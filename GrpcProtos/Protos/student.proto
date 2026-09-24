@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+option csharp_namespace = "StudentManagement.Grpc";
+
+package student;
+import "class.proto";
+
+message StudentDtoForList {
+  int32 id = 1;
+  string name = 2;
+  string dateOfBirth = 3; // ISO 8601
+  string address = 4;
+}
+
+message StudentDto {
+  int32 id = 1;
+  string name = 2;
+  string dateOfBirth = 3; // ISO 8601
+  string address = 4;
+  repeated ClassDto classes = 5; // List of classes
+}
+
+message AddStudentDto {
+  int32 id = 1;
+  string name = 2;
+  string dateOfBirth = 3; // ISO 8601
+  string address = 4;
+  repeated int32 classIds = 5; // List of class IDs
+}
+
+message UpdateStudentDto {
+  int32 id = 1;
+  string name = 2;
+  string dateOfBirth = 3; // ISO 8601
+  string address = 4;
+  repeated int32 classIds = 5; // List of class IDs
+}
+
+message GetAllStudentsRequest {
+	int32 page = 1;
+    int32 pageSize = 2;
+}
+message GetAllStudentsResponse {
+  repeated StudentDtoForList students = 1;
+  int32 totalCount = 2; 
+}
+
+message GetStudentByIdRequest { int32 id = 1; }
+message GetStudentByIdResponse { StudentDto student = 1; }
+
+message AddStudentRequest { AddStudentDto student = 1; }
+message AddStudentResponse { StudentDto student = 1; }
+
+message UpdateStudentRequest { UpdateStudentDto student = 1; }
+message UpdateStudentResponse { StudentDto student = 1; }
+
+message DeleteStudentRequest { int32 id = 1; }
+message DeleteStudentResponse { bool success = 1; }
+
+service StudentService {
+  rpc GetAllStudents (GetAllStudentsRequest) returns (GetAllStudentsResponse);
+  rpc GetStudentById (GetStudentByIdRequest) returns (GetStudentByIdResponse);
+  rpc AddStudent (AddStudentRequest) returns (AddStudentResponse);
+  rpc UpdateStudent (UpdateStudentRequest) returns (UpdateStudentResponse);
+  rpc DeleteStudent (DeleteStudentRequest) returns (DeleteStudentResponse);
+  rpc ArrangeStudentsByName (GetAllStudentsRequest) returns (GetAllStudentsResponse);
+}
+

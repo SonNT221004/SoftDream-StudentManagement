@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+option csharp_namespace = "StudentManagement.Grpc";
+
+package student;
+import "teacher.proto";
+
+message ClassDto {
+  int32 id = 1;
+  string name = 2;
+  TeacherDto teacher = 3;
+}
+
+message ClassDtoForList {
+  string name = 2;
+  string teacherName = 3;
+}
+
+
+message GetAllClassesRequest {}
+message GetAllClassesResponse {
+  repeated ClassDto classes = 1;
+}
+
+service ClassService {
+  rpc GetAllClasses (GetAllClassesRequest) returns (GetAllClassesResponse);
+}

@@ -1,0 +1,44 @@
+﻿@using StudentWeb.Resilience
+@inject GrpcConnectionState Connection
+@implements IDisposable
+
+@if (Connection.IsRetrying)
+{
+    <div class="alert alert-warning d-flex justify-content-between align-items-center" role="status">
+        <div>
+            <strong>Trying to reconnect</strong>
+            — lần @Connection.Attempt / @Connection.MaxAttempts,
+            chờ @Connection.RetryDelay.TotalSeconds.ToString("0.#")s.
+            @if (!string.IsNullOrWhiteSpace(Connection.Detail))
+            {
+                <span class="text-muted">(@Connection.Detail)</span>
+            }
+        </div>
+        <div class="spinner-border spinner-border-sm" aria-hidden="true"></div>
+    </div>
+}
+else if (Connection.IsUnavailable)
+{
+    <div class="alert alert-danger" role="alert">
+        <h5 class="alert-heading">Cannot connect to server</h5>
+        <button type="button" class="btn btn-outline-danger" @onclick="RetryAsync">
+            Try Again
+        </button>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public EventCallback OnRetry { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Connection.Changed += OnChanged;
+    }
+
+    private void OnChanged() => _ = InvokeAsync(StateHasChanged);
+
+    private Task RetryAsync() => OnRetry.InvokeAsync();
+
+    public void Dispose() => Connection.Changed -= OnChanged;
+}

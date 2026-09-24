@@ -1,0 +1,49 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "StudentManagement.Grpc";
+
+package student;
+
+message ClassTeacherDto {
+  string teacherName = 1;
+  int32 numberOfClass = 2;
+}
+
+message StudentAddressDto {
+  string locationName = 1;
+  int32 numberOfStudent = 2;
+}
+
+
+message GetClassCountPerTeacherRequest{}
+message GetClassCountPerTeacherResponse {
+  repeated ClassTeacherDto classTeacher = 1;
+}
+
+message GetStudentCountByAddressRequest{}
+message GetStudentCountByAddressResponse {
+  repeated StudentAddressDto studentAddress = 1;
+}
+
+message GetTotalNumberOfClassesRequest{}
+message GetTotalNumberOfClassesResponse {
+  int32 numberOfClass = 1;
+}
+
+message GetTotalNumberOfStudentsRequest{}
+message GetTotalNumberOfStudentsResponse {
+  int32 numberOfStudent = 1;
+}
+
+message GetTotalNumberOfTeachersRequest{}
+message GetTotalNumberOfTeachersResponse {
+  int32 numberOfTeacher = 1;
+}
+
+service AnalyticsService {
+  rpc GetClassCountPerTeacher (GetClassCountPerTeacherRequest) returns (GetClassCountPerTeacherResponse);
+  rpc GetStudentCountByAddress (GetStudentCountByAddressRequest) returns (GetStudentCountByAddressResponse);
+  rpc GetTotalNumberOfClasses (GetTotalNumberOfClassesRequest) returns (GetTotalNumberOfClassesResponse);
+  rpc GetTotalNumberOfStudents (GetTotalNumberOfStudentsRequest) returns (GetTotalNumberOfStudentsResponse);
+  rpc GetTotalNumberOfTeachers (GetTotalNumberOfTeachersRequest) returns (GetTotalNumberOfTeachersResponse);
+}

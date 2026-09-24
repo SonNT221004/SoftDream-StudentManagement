@@ -1,0 +1,12 @@
+# Visual Studio
+.vs/
+
+# Build outputs
+bin/
+obj/
+
+# User secrets / env
+.env
+
+# Local storage used by the sample app
+StudentManagement/Storage/

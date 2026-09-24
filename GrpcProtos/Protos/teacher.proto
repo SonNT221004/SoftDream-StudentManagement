@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+option csharp_namespace = "StudentManagement.Grpc";
+
+package student;
+
+message TeacherDto {
+  int32 id = 1;
+  string name = 2;
+}
+
+message GetAllTeachersRequest {}
+message GetAllTeachersResponse {
+  repeated TeacherDto teachers = 1;
+}
+
+message GetTeacherByIdRequest { int32 id = 1; }
+message GetTeacherByIdResponse { TeacherDto teacher = 1; }
+
+message AddTeacherRequest { TeacherDto teacher = 1; }
+message AddTeacherResponse { TeacherDto teacher = 1; }
+
+message UpdateTeacherRequest { TeacherDto teacher = 1; }
+message UpdateTeacherResponse { TeacherDto teacher = 1; }
+
+message DeleteTeacherRequest { int32 id = 1; }
+message DeleteTeacherResponse { bool success = 1; }
+
+service TeacherService {
+  rpc GetAllTeachers (GetAllTeachersRequest) returns (GetAllTeachersResponse);
+  rpc GetTeacherById (GetTeacherByIdRequest) returns (GetTeacherByIdResponse);
+  rpc AddTeacher (AddTeacherRequest) returns (AddTeacherResponse);
+  rpc UpdateTeacher (UpdateTeacherRequest) returns (UpdateTeacherResponse);
+  rpc DeleteTeacher (DeleteTeacherRequest) returns (DeleteTeacherResponse);
+}
