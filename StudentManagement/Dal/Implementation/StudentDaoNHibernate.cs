@@ -41,18 +41,34 @@ namespace StudentManagement.Dal.Implementation
         public async Task<Student> AddStudentAsync(Student student)
         {
             using var tx = _session.BeginTransaction();
-            await _session.SaveAsync(student);
-            tx.Commit();
-            return student;
+            try
+            {
+                await _session.SaveAsync(student);
+                tx.Commit();
+                return student;
+            }
+            catch
+            {
+                tx.Rollback();
+                throw;
+            }
         }
 
         public async Task<Student?> UpdateStudentAsync(Student student)
         {
             using var tx = _session.BeginTransaction();
-            // Use Merge to handle detached instances safely
-            var merged = await _session.MergeAsync(student) as Student;
-            tx.Commit();
-            return merged;
+            try
+            {
+                // Use Merge to handle detached instances safely
+                var merged = await _session.MergeAsync(student) as Student;
+                tx.Commit();
+                return merged;
+            }
+            catch
+            {
+                tx.Rollback();
+                throw;
+            }
         }
 
         public async Task<bool> DeleteStudentAsync(int id)
