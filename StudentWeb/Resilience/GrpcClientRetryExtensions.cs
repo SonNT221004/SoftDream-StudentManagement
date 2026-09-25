@@ -3,6 +3,8 @@ using Grpc.Net.ClientFactory;
 using Polly;
 using Polly.CircuitBreaker;
 using Polly.Retry;
+using StudentWeb.Resilience.ConnectionState;
+using StudentWeb.Resilience.MyInterceptor;
 
 namespace StudentWeb.Resilience;
 
@@ -15,74 +17,48 @@ public static class GrpcClientRetryExtensions
         var maxRetryAttempts = configuration.GetValue("Grpc:Retry:MaxRetryAttempts", 3);
         var delayMilliseconds = configuration.GetValue("Grpc:Retry:DelayMilliseconds", 200);
 
-        services.AddScoped<GrpcConnectionState>();
-        services.AddScoped<GrpcRetryInterceptor>();
+        services.AddScoped<StudentGrpcConnectionState>();
+        services.AddScoped<ClassGrpcConnectionState>();
+        services.AddScoped<AnalyticsGrpcConnectionState>();
 
-        services.AddResiliencePipeline(GrpcRetryInterceptor.PipelineName, (pipeline, context) =>
-        {
-            pipeline.AddRetry(new RetryStrategyOptions
-            {
-                MaxRetryAttempts = maxRetryAttempts,
-                Delay = TimeSpan.FromMilliseconds(delayMilliseconds),
-                BackoffType = DelayBackoffType.Exponential,
-                UseJitter = true,
-                ShouldHandle = new PredicateBuilder()
-                    .Handle<RpcException>(ex => IsTransient(ex.StatusCode)),
-                OnRetry = args =>
-                {
-                    var status = (args.Outcome.Exception as RpcException)?.StatusCode;
-                    if (args.Context.Properties.TryGetValue(GrpcResilienceKeys.Ui, out var ui))
-                    {
-                        ui.ReportRetry(
-                            args.AttemptNumber + 1,
-                            maxRetryAttempts,
-                            args.RetryDelay,
-                            $"Status={status}");
-                    }
+        services.AddScoped<StudentGrpcRetryInterceptor>();
+        services.AddScoped<ClassGrpcRetryInterceptor>();
+        services.AddScoped<AnalyticsGrpcRetryInterceptor>();
 
-                    Console.WriteLine(
-                        $"gRPC transient retry {args.AttemptNumber + 1}/{maxRetryAttempts} in {args.RetryDelay}. Status={status}");
-                    return default;
-                }
-            });
+        services.AddResiliencePipeline(
+    GrpcPipelineNames.Student,
+    (pipeline,_) => ConfigureGrpcPipeline(pipeline, maxRetryAttempts, delayMilliseconds));
 
-            pipeline.AddCircuitBreaker(new CircuitBreakerStrategyOptions
-            {
-                FailureRatio = 1.0,
-                SamplingDuration = TimeSpan.FromSeconds(30),
-                MinimumThroughput = 2,
-                BreakDuration = TimeSpan.FromSeconds(60),
+        services.AddResiliencePipeline(
+            GrpcPipelineNames.Class,
+            (pipeline, _) => ConfigureGrpcPipeline(pipeline, maxRetryAttempts, delayMilliseconds));
 
-                ShouldHandle = new PredicateBuilder()
-        .Handle<RpcException>(ex => IsTransient(ex.StatusCode)),
+        services.AddResiliencePipeline(
+            GrpcPipelineNames.Analytics,
+            (pipeline, _) => ConfigureGrpcPipeline(pipeline, maxRetryAttempts, delayMilliseconds));
 
-                OnOpened = args =>
-                {
-                    Console.WriteLine("Circuit OPENED");
-                    return default;
-                },
 
-                OnHalfOpened = args =>
-                {
-                    Console.WriteLine("Circuit HALF-OPENED");
-                    return default;
-                },
-
-                OnClosed = args =>
-                {
-                    Console.WriteLine("Circuit CLOSED");
-                    return default;
-                }
-            });
-
-        });
-
-           
         return services;
     }
-    public static IHttpClientBuilder AddGrpcTransientRetry(this IHttpClientBuilder httpClientBuilder)
+    public static IHttpClientBuilder AddStudentGrpcRetry(
+       this IHttpClientBuilder httpClientBuilder)
     {
-        return httpClientBuilder.AddInterceptor<GrpcRetryInterceptor>(InterceptorScope.Client);
+        return httpClientBuilder.AddInterceptor<StudentGrpcRetryInterceptor>(
+            InterceptorScope.Client);
+    }
+
+    public static IHttpClientBuilder AddClassGrpcRetry(
+        this IHttpClientBuilder httpClientBuilder)
+    {
+        return httpClientBuilder.AddInterceptor<ClassGrpcRetryInterceptor>(
+            InterceptorScope.Client);
+    }
+
+    public static IHttpClientBuilder AddAnalyticsGrpcRetry(
+        this IHttpClientBuilder httpClientBuilder)
+    {
+        return httpClientBuilder.AddInterceptor<AnalyticsGrpcRetryInterceptor>(
+            InterceptorScope.Client);
     }
 
     private static bool IsTransient(StatusCode statusCode) =>
@@ -91,4 +67,44 @@ public static class GrpcClientRetryExtensions
             or StatusCode.ResourceExhausted
             or StatusCode.Aborted
             or StatusCode.Internal;
+    private static void ConfigureGrpcPipeline(
+    ResiliencePipelineBuilder pipeline,
+    int maxRetryAttempts,
+    int delayMilliseconds)
+    {
+        pipeline
+            .AddRetry(new RetryStrategyOptions
+            {
+                MaxRetryAttempts = maxRetryAttempts,
+                Delay = TimeSpan.FromMilliseconds(delayMilliseconds),
+                BackoffType = DelayBackoffType.Exponential,
+                UseJitter = true,
+                ShouldHandle = new PredicateBuilder()
+                    .Handle<RpcException>(ex => IsTransient(ex.StatusCode))
+            })
+            .AddCircuitBreaker(new CircuitBreakerStrategyOptions
+            {
+                FailureRatio = 1.0,
+                SamplingDuration = TimeSpan.FromSeconds(30),
+                MinimumThroughput = 2,
+                BreakDuration = TimeSpan.FromSeconds(20),
+                ShouldHandle = new PredicateBuilder()
+                    .Handle<RpcException>(ex => IsTransient(ex.StatusCode)),
+                OnOpened = _ =>
+                {
+                    Console.WriteLine("Circuit OPENED");
+                    return default;
+                },
+                OnHalfOpened = _ =>
+                {
+                    Console.WriteLine("Circuit HALF-OPENED");
+                    return default;
+                },
+                OnClosed = _ =>
+                {
+                    Console.WriteLine("Circuit CLOSED");
+                    return default;
+                }
+            });
+    }
 }

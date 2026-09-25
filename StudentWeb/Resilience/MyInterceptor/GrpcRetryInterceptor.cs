@@ -2,22 +2,22 @@ using Grpc.Core;
 using Grpc.Core.Interceptors;
 using Polly;
 using Polly.Registry;
+using StudentWeb.Resilience.ConnectionState;
 
-namespace StudentWeb.Resilience;
+namespace StudentWeb.Resilience.MyInterceptor;
 
-public sealed class GrpcRetryInterceptor : Interceptor
+public abstract class GrpcRetryInterceptor : Interceptor
 {
-    public const string PipelineName = "grpc-rpc-retry";
-
     private readonly ResiliencePipeline _pipeline;
     private readonly GrpcConnectionState _ui;
 
-    public GrpcRetryInterceptor(
-        ResiliencePipelineProvider<string> pipelineProvider,
-        GrpcConnectionState ui)
+    protected GrpcRetryInterceptor(
+     ResiliencePipelineProvider<string> pipelineProvider,
+     GrpcConnectionState connection,
+     string pipelineName)
     {
-        _pipeline = pipelineProvider.GetPipeline(PipelineName);
-        _ui = ui;
+        _pipeline = pipelineProvider.GetPipeline(pipelineName);
+        _ui = connection;
     }
 
     public override AsyncUnaryCall<TResponse> AsyncUnaryCall<TRequest, TResponse>(

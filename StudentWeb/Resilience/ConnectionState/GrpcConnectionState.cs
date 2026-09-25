@@ -1,6 +1,6 @@
-﻿namespace StudentWeb.Resilience;
+﻿namespace StudentWeb.Resilience.ConnectionState;
 
-public sealed class GrpcConnectionState
+public class GrpcConnectionState
 {
     public bool IsRetrying { get; private set; }
     public bool IsUnavailable { get; private set; }

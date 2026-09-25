@@ -21,6 +21,10 @@ namespace StudentManagement.Grpc
 
         public override async Task<GetAllStudentsResponse> GetAllStudents(GetAllStudentsRequest request, ServerCallContext context)
         {
+            throw new RpcException(
+        new Status(
+            StatusCode.Unavailable,
+            "Test circuit breaker"));
             var students = await _studentService.GetAllStudentsAsync(request.Page, request.PageSize);
             var response = new GetAllStudentsResponse
             {

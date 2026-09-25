@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using StudentWeb.Models;
-using StudentWeb.Resilience;
+using StudentWeb.Resilience.ConnectionState;
 using StudentWeb.Services.Interface;
 
 namespace StudentWeb.Components.Pages
@@ -13,7 +13,7 @@ namespace StudentWeb.Components.Pages
     {
         [Inject] public IStudentService StudentService { get; set; } = default!;
         [Inject] public IClassService ClassService { get; set; } = default!;
-        [Inject] public GrpcConnectionState Connection { get; set; } = default!;
+        [Inject] public StudentGrpcConnectionState Connection { get; set; } = default!;
 
         // Paging
         private int currentPage = 1;

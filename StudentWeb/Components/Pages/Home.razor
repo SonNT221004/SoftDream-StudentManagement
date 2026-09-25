@@ -6,7 +6,8 @@
 
 <PageTitle>Students</PageTitle>
 
-<GrpcConnectionPanel OnRetry="FirstLoadAllAsync" />
+<GrpcConnectionPanel Connection="Connection"
+                     OnRetry="FirstLoadAllAsync" />
 @if (Connection.IsUnavailable && students.Count == 0)
 {
     <div class="text-center text-muted py-5">

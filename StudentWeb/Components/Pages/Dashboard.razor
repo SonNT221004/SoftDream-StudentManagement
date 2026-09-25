@@ -4,10 +4,12 @@
 @using StudentWeb.Services.Interface
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 
+<GrpcConnectionPanel Connection="Connection"
+                     OnRetry="FirstLoadChartAsync" />
 @if (Connection.IsUnavailable)
 {
     <div class="text-center text-muted py-5">
-        <p>Unable to load student list.</p>
+        <p>Unable to load analytics.</p>
     </div>
 }
 else if (isLoading || Connection.IsRetrying)

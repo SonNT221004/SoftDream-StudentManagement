@@ -3,16 +3,16 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using StudentWeb.Models;
-using StudentWeb.Resilience;
 using StudentWeb.Services.Interface;
 using AntDesign.Charts;
+using StudentWeb.Resilience.ConnectionState;
 
 namespace StudentWeb.Components.Pages
 {
     public partial class Dashboard : ComponentBase, IDisposable
     {
         [Inject] public IAnalyticsService AnalyticsService { get; set; } = default!;
-        [Inject] public GrpcConnectionState Connection { get; set; } = default!;
+        [Inject] public AnalyticsGrpcConnectionState Connection { get; set; } = default!;
 
         private string? errorMessage;
         private bool isLoading;

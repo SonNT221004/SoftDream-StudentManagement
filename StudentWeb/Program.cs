@@ -1,3 +1,4 @@
+using Grpc.Net.ClientFactory;
 using StudentManagement.Grpc;
 using StudentWeb.AutoMapper;
 using StudentWeb.Components;
@@ -22,19 +23,18 @@ builder.Services.AddGrpcClient<StudentService.StudentServiceClient>(options =>
 {
     options.Address = new Uri(grpcServerAddress);
 })
-.AddGrpcTransientRetry();
+.AddStudentGrpcRetry();
 
 builder.Services.AddGrpcClient<ClassService.ClassServiceClient>(options =>
 {
     options.Address = new Uri(grpcServerAddress);
 })
-.AddGrpcTransientRetry();
-
+.AddClassGrpcRetry();
 builder.Services.AddGrpcClient<AnalyticsService.AnalyticsServiceClient>(options =>
 {
     options.Address = new Uri(grpcServerAddress);
 })
-.AddGrpcTransientRetry();
+.AddAnalyticsGrpcRetry();
 
 builder.Services.AddScoped<IStudentService, GrpcStudentService>();
 builder.Services.AddScoped<IClassService, GrpcClassService>();

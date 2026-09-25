@@ -1,5 +1,5 @@
 ﻿@using StudentWeb.Resilience
-@inject GrpcConnectionState Connection
+@using StudentWeb.Resilience.ConnectionState
 @implements IDisposable
 
 @if (Connection.IsRetrying)
@@ -28,6 +28,8 @@ else if (Connection.IsUnavailable)
 }
 
 @code {
+    [Parameter]
+    public GrpcConnectionState Connection { get; set; } = default!;
     [Parameter]
     public EventCallback OnRetry { get; set; }
 
