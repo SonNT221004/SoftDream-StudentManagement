@@ -1,16 +1,17 @@
-﻿using DotNetEnv;
+﻿using AutoMapper;
+using DotNetEnv;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using AutoMapper;
 using StudentManagement.Automapper;
 using StudentManagement.Dal.Implementation;
 using StudentManagement.Dal.Interface;
 using StudentManagement.Data;
 using StudentManagement.DTO.Student;
 using StudentManagement.Extensions;
-using StudentManagement.Model;
 using StudentManagement.Repository.Implementation;
 using StudentManagement.Repository.Interface;
 using StudentManagement.Service.Implementation;
@@ -20,8 +21,15 @@ public static class Program
 {
     private static readonly Regex ClassIdsPattern = new(@"^\s*\d+(\s*,\s*\d+)*\s*$", RegexOptions.Compiled);
     private static bool _nHibernateRegistered = false;
+
     public static async Task Main(string[] args)
     {
+        var configuration = new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json", optional: true)
+    .AddEnvironmentVariables()
+    .Build();
+
+        var port = configuration.GetValue<int>("Grpc:Port", 5000);
         // Load .env (if present) so Environment.GetEnvironmentVariable can find NEON_CONNECTION for local dev
         try
         {
@@ -37,7 +45,7 @@ public static class Program
         // Create service provider used by console UI
         var serviceProvider = CreateServiceProvider(storagePath);
         // Start gRPC server in background (uses same registrations)
-        (var grpcApp, var grpcTask) = StartGrpcHost(args, storagePath);
+        (var grpcApp, var grpcTask) = StartGrpcHost(args, storagePath, port);
         var scope = serviceProvider.CreateScope();
         var studentService = scope.ServiceProvider.GetRequiredService<IStudentService>();
         var classService = scope.ServiceProvider.GetRequiredService<IClassService>();
@@ -373,7 +381,7 @@ public static class Program
                         classService = scope.ServiceProvider.GetRequiredService<IClassService>();
 
                         // restart gRPC host
-                        (grpcApp, grpcTask) = StartGrpcHost(args, storagePath);
+                        (grpcApp, grpcTask) = StartGrpcHost(args, storagePath, port);
 
                         Console.WriteLine("Storage mode changed successfully.");
                         break;
@@ -465,6 +473,7 @@ public static class Program
 
     private static void RegisterCommonServices(IServiceCollection services)
     {
+
         services
             .AddScoped<IStudentService, StudentService>()
             .AddScoped<IStudentRepository, StudentRepository>()
@@ -474,6 +483,7 @@ public static class Program
             .AddScoped<ITeacherRepository, TeacherRepository>()
             .AddScoped<IAnalyticsService, AnalyticsService>()
             .AddScoped<IAnalyticsRepository, AnalyticsRepository>();
+
         //automapper
         services.AddLogging();
         services.AddAutoMapper(
@@ -489,38 +499,50 @@ public static class Program
         return services.BuildServiceProvider();
     }
 
-    private static (WebApplication app, Task serverTask) StartGrpcHost(string[] args, string storagePath)
+    private static (WebApplication app, Task serverTask) StartGrpcHost(
+        string[] args,
+        string storagePath,
+        int port)
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // configure Kestrel for HTTP/2 over HTTPS on 5000
         builder.WebHost.ConfigureKestrel(options =>
         {
-            options.ListenLocalhost(5000, listen =>
+            options.ListenLocalhost(port, listen =>
             {
                 listen.UseHttps();
                 listen.Protocols = HttpProtocols.Http2;
             });
         });
 
-        // Register application services (repositories, services) so DI can resolve IStudentService
         RegisterCommonServices(builder.Services);
-        // Decide storage based on environment connection string at host startup.
-        // Do NOT call AddNHibernate with an empty connection string.
-        var envConnRawServer = Environment.GetEnvironmentVariable("NEON_CONNECTION");
-        var neoConnServer = ConnectionStringHelper.NormalizePostgresConnectionString(envConnRawServer);
-        if (!string.IsNullOrWhiteSpace(neoConnServer)&& _nHibernateRegistered)
+
+        var envConnRawServer =
+            Environment.GetEnvironmentVariable("NEON_CONNECTION");
+
+        var neoConnServer =
+            ConnectionStringHelper.NormalizePostgresConnectionString(
+                envConnRawServer);
+
+        if (!string.IsNullOrWhiteSpace(neoConnServer) &&
+            _nHibernateRegistered)
         {
             builder.Services.AddNHibernate(neoConnServer);
+
             builder.Services.AddScoped<IStudentDAO, StudentDaoNHibernate>();
             builder.Services.AddScoped<IClassDAO, ClassDaoNHibernate>();
             builder.Services.AddScoped<ITeacherDAO, TeacherDaoNHibernate>();
         }
         else
         {
-            builder.Services.AddSingleton<IStudentDAO>(_ => new StudentDaoLocalStorage(storagePath));
-            builder.Services.AddSingleton<IClassDAO>(_ => new ClassDaoLocalStorage(storagePath));
-            builder.Services.AddSingleton<ITeacherDAO>(_ => new TeacherDaoLocalStorage(storagePath));
+            builder.Services.AddSingleton<IStudentDAO>(
+                _ => new StudentDaoLocalStorage(storagePath));
+
+            builder.Services.AddSingleton<IClassDAO>(
+                _ => new ClassDaoLocalStorage(storagePath));
+
+            builder.Services.AddSingleton<ITeacherDAO>(
+                _ => new TeacherDaoLocalStorage(storagePath));
         }
 
         builder.Services.AddGrpc();
@@ -530,7 +552,15 @@ public static class Program
         app.MapGrpcService<StudentManagement.Grpc.StudentGrpcService>();
         app.MapGrpcService<StudentManagement.Grpc.ClassGrpcService>();
         app.MapGrpcService<StudentManagement.Grpc.AnalyticsGrpcService>();
-        app.MapGet("/", () => "StudentManagement gRPC server running.");
+
+        app.MapGet("/health", () => Results.Ok(new
+        {
+            status = "Healthy",
+            processId = Environment.ProcessId
+        }));
+
+        app.MapGet("/", () =>
+            $"StudentManagement gRPC server running on port {port}.");
 
         var serverTask = app.RunAsync();
 
