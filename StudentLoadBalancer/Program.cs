@@ -8,7 +8,7 @@ builder.WebHost.ConfigureKestrel(options =>
     {
         listen.UseHttps();
         listen.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http2;
-    });
+    }); 
 });
 
 builder.Services

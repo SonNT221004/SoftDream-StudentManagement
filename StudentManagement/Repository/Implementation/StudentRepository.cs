@@ -22,16 +22,16 @@ namespace StudentManagement.Repository.Implementation
             _teacherRepository = teacherRepository ?? throw new ArgumentNullException(nameof(teacherRepository));
         }
 
-        public async Task<Student> AddStudentAsync(Student student, List<int> classIds)
+        public async Task<Student> AddStudentAsync(Student student, List<int> classIds, CancellationToken cancellationToken)
         {
-            var classes = await _classRepository.GetClassesByIdsAsync(classIds);
+            var classes = await _classRepository.GetClassesByIdsAsync(classIds, cancellationToken);
             student.Classes = classes;
-            return await _studentDao.AddStudentAsync(student);
+            return await _studentDao.AddStudentAsync(student, cancellationToken);
         }
 
-        public async Task<int> CountStudentsAsync()
+        public async Task<int> CountStudentsAsync(CancellationToken cancellationToken)
         {
-           return await _studentDao.CountStudentsAsync();
+           return await _studentDao.CountStudentsAsync(cancellationToken);
         }
 
         //public Task<bool> ArrangeStudentsByNameAsync()
@@ -39,19 +39,19 @@ namespace StudentManagement.Repository.Implementation
         //    return _studentDao.ArrangeStudentsByNameAsync();
         //}
 
-        public Task<bool> DeleteStudentAsync(int id)
+        public Task<bool> DeleteStudentAsync(int id, CancellationToken cancellationToken)
         {
-            return _studentDao.DeleteStudentAsync(id);
+            return _studentDao.DeleteStudentAsync(id, cancellationToken);
         }
 
-        public async Task<List<Student>> GetAllStudentsAsync(int page, int pageSize)
+        public async Task<List<Student>> GetAllStudentsAsync(int page, int pageSize, CancellationToken cancellationToken)
         {
-            return await _studentDao.GetAllStudentsAsync(page, pageSize);
+            return await _studentDao.GetAllStudentsAsync(page, pageSize, cancellationToken);
         }
 
-        public async Task<Student?> GetStudentByIdAsync(int id)
+        public async Task<Student?> GetStudentByIdAsync(int id, CancellationToken cancellationToken)
         {
-            var student = await _studentDao.GetStudentByIdAsync(id);
+            var student = await _studentDao.GetStudentByIdAsync(id, cancellationToken);
             if (student == null)
                 return null;
 
@@ -59,12 +59,12 @@ namespace StudentManagement.Repository.Implementation
             if (student.Classes != null && student.Classes.Count > 0)
             {
                 var ids = student.Classes.Select(c => c.Id).ToList();
-                var classes = await _classRepository.GetClassesByIdsAsync(ids);
+                var classes = await _classRepository.GetClassesByIdsAsync(ids, cancellationToken);
                 foreach(var cls in classes)
                 {
                     if (cls.Teacher != null && cls.Teacher.Id > 0)
                     {
-                        var teacher = await _teacherRepository.GetTeacherByIdAsync(cls.Teacher.Id);
+                        var teacher = await _teacherRepository.GetTeacherByIdAsync(cls.Teacher.Id, cancellationToken);
                         cls.Teacher = teacher;
                     }
                 }
@@ -74,11 +74,11 @@ namespace StudentManagement.Repository.Implementation
             return student;
         }
 
-        public async Task<Student?> UpdateStudentAsync(Student student, List<int> classIds)
+        public async Task<Student?> UpdateStudentAsync(Student student, List<int> classIds, CancellationToken cancellationToken)
         {
-            var classes = await _classRepository.GetClassesByIdsAsync(classIds);
+            var classes = await _classRepository.GetClassesByIdsAsync(classIds, cancellationToken);
             student.Classes = classes;
-            return await _studentDao.UpdateStudentAsync(student);
+            return await _studentDao.UpdateStudentAsync(student, cancellationToken);
         }
     }
 }

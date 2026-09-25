@@ -14,7 +14,7 @@ namespace StudentManagement.Dal.Implementation
             _session = session ?? throw new ArgumentNullException(nameof(session));
         }
 
-        public async Task<List<Student>> GetAllStudentsAsync(int page, int pageSize)
+        public async Task<List<Student>> GetAllStudentsAsync(int page, int pageSize, CancellationToken cancellationToken)
         {
             IQueryable<Student> query = _session.Query<Student>().OrderBy(s => s.Id);
 
@@ -29,21 +29,21 @@ namespace StudentManagement.Dal.Implementation
                 query = query.Skip(skip).Take(pageSize);
             }
 
-            return await query.ToListAsync();
+            return await query.ToListAsync(cancellationToken);
         }
 
-        public async Task<Student?> GetStudentByIdAsync(int id)
+        public async Task<Student?> GetStudentByIdAsync(int id, CancellationToken cancellationToken)
         {
-            var student = await _session.GetAsync<Student>(id);
+            var student = await _session.GetAsync<Student>(id, cancellationToken);
             return student;
         }
 
-        public async Task<Student> AddStudentAsync(Student student)
+        public async Task<Student> AddStudentAsync(Student student, CancellationToken cancellationToken)
         {
             using var tx = _session.BeginTransaction();
             try
             {
-                await _session.SaveAsync(student);
+                await _session.SaveAsync(student, cancellationToken);
                 tx.Commit();
                 return student;
             }
@@ -54,13 +54,13 @@ namespace StudentManagement.Dal.Implementation
             }
         }
 
-        public async Task<Student?> UpdateStudentAsync(Student student)
+        public async Task<Student?> UpdateStudentAsync(Student student, CancellationToken cancellationToken)
         {
             using var tx = _session.BeginTransaction();
             try
             {
                 // Use Merge to handle detached instances safely
-                var merged = await _session.MergeAsync(student) as Student;
+                var merged = await _session.MergeAsync(student, cancellationToken) as Student;
                 tx.Commit();
                 return merged;
             }
@@ -71,24 +71,24 @@ namespace StudentManagement.Dal.Implementation
             }
         }
 
-        public async Task<bool> DeleteStudentAsync(int id)
+        public async Task<bool> DeleteStudentAsync(int id, CancellationToken cancellationToken)
         {
             using var tx = _session.BeginTransaction();
-            var student = await _session.GetAsync<Student>(id);
+            var student = await _session.GetAsync<Student>(id, cancellationToken);
             if (student == null)
             {
                 tx.Rollback();
                 return false;
             }
 
-            await _session.DeleteAsync(student);
+            await _session.DeleteAsync(student, cancellationToken);
             tx.Commit();
             return true;
         }
 
-        public async Task<int> CountStudentsAsync()
+        public async Task<int> CountStudentsAsync(CancellationToken cancellationToken)
         {
-            return await _session.Query<Student>().CountAsync();
+            return await _session.Query<Student>().CountAsync(cancellationToken);
         }
     }
 }

@@ -23,15 +23,15 @@ namespace StudentManagement.Dal.Implementation
             _filePath = Path.Combine(storageDirectory, "Class.txt");
         }
 
-        public async Task<int> CountClassesAsync()
+        public async Task<int> CountClassesAsync(CancellationToken cancellationToken)
         {
-            await _fileLock.WaitAsync();
+            await _fileLock.WaitAsync(cancellationToken);
             try
             {
                 if (!File.Exists(_filePath))
                     return 0;
 
-                var lines = await File.ReadAllLinesAsync(_filePath);
+                var lines = await File.ReadAllLinesAsync(_filePath, cancellationToken);
                 var count = 0;
 
                 foreach (var line in lines)
@@ -51,15 +51,15 @@ namespace StudentManagement.Dal.Implementation
             }
         }
 
-        public async Task<List<Class>> GetAllClassesAsync()
+        public async Task<List<Class>> GetAllClassesAsync(CancellationToken cancellationToken)
         {
-            await _fileLock.WaitAsync();
+            await _fileLock.WaitAsync(cancellationToken);
             try
             {
                 if (!File.Exists(_filePath))
                     return new List<Class>();
 
-                var lines = await File.ReadAllLinesAsync(_filePath);
+                var lines = await File.ReadAllLinesAsync(_filePath, cancellationToken);
                 var list = new List<Class>();
                 foreach (var line in lines)
                 {
@@ -78,13 +78,13 @@ namespace StudentManagement.Dal.Implementation
             }
         }
 
-        public async Task<List<Class>> GetClassesByIdsAsync(IEnumerable<int> ids)
+        public async Task<List<Class>> GetClassesByIdsAsync(IEnumerable<int> ids, CancellationToken cancellationToken)
         {
             var idSet = new HashSet<int>(ids ?? Array.Empty<int>());
             if (idSet.Count == 0)
                 return new List<Class>();
 
-            var all = await GetAllClassesAsync();
+            var all = await GetAllClassesAsync(cancellationToken);
             return all.Where(c => idSet.Contains(c.Id)).ToList();
         }
 

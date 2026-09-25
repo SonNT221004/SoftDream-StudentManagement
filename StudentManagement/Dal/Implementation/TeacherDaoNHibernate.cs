@@ -18,14 +18,14 @@ namespace StudentManagement.Dal.Implementation
             _session = session ?? throw new ArgumentNullException(nameof(session));
         }
 
-        public async Task<int> CountTeachersAsync()
+        public async Task<int> CountTeachersAsync(CancellationToken cancellationToken)
         {
-            return await _session.Query<Teacher>().CountAsync();
+            return await _session.Query<Teacher>().CountAsync(cancellationToken);
         }
 
-        public Task<Teacher?> GetTeacherById(int id)
+        public Task<Teacher?> GetTeacherById(int id, CancellationToken cancellationToken)
         {
-            return _session.Query<Teacher>().FirstOrDefaultAsync(t => t.Id == id);
+            return _session.Query<Teacher>().FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
         }
     }
 }

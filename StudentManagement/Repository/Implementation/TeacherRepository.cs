@@ -18,14 +18,14 @@ namespace StudentManagement.Repository.Implementation
             _teacherDao = teacherDao ?? throw new ArgumentNullException(nameof(teacherDao));
         }
 
-        public async Task<int> CountTeachersAsync()
+        public async Task<int> CountTeachersAsync(CancellationToken cancellationToken)
         {
-            return await _teacherDao.CountTeachersAsync();
+            return await _teacherDao.CountTeachersAsync(cancellationToken);
         }
 
-        public Task<Teacher?> GetTeacherByIdAsync(int id)
+        public Task<Teacher?> GetTeacherByIdAsync(int id, CancellationToken cancellationToken)
         {
-            return _teacherDao.GetTeacherById(id);
+            return _teacherDao.GetTeacherById(id, cancellationToken);
         }
 
     }

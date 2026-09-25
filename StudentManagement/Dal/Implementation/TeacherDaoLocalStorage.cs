@@ -21,15 +21,15 @@ namespace StudentManagement.Dal.Implementation
             _filePath = Path.Combine(storageDirectory, "Teacher.txt");
         }
 
-        public async Task<int> CountTeachersAsync()
+        public async Task<int> CountTeachersAsync(CancellationToken cancellationToken)
         {
-            await _fileLock.WaitAsync();
+            await _fileLock.WaitAsync(cancellationToken);
             try
             {
                 if (!File.Exists(_filePath))
                     return 0;
 
-                var lines = await File.ReadAllLinesAsync(_filePath);
+                var lines = await File.ReadAllLinesAsync(_filePath, cancellationToken);
                 var count = 0;
 
                 foreach (var line in lines)
@@ -49,14 +49,14 @@ namespace StudentManagement.Dal.Implementation
             }
         }
 
-        public async Task<Teacher?> GetTeacherById(int id)
+        public async Task<Teacher?> GetTeacherById(int id, CancellationToken cancellationToken)
         {
-            await _fileLock.WaitAsync();
+            await _fileLock.WaitAsync(cancellationToken);
             try
             {
                 if (!File.Exists(_filePath))
                     return null;
-                var lines = await File.ReadAllLinesAsync(_filePath);
+                var lines = await File.ReadAllLinesAsync(_filePath, cancellationToken);
                 foreach (var line in lines)
                 {
                     if (string.IsNullOrWhiteSpace(line))
@@ -74,7 +74,7 @@ namespace StudentManagement.Dal.Implementation
 
         }
 
-        private Teacher? ParseLine(string line)
+        private static Teacher? ParseLine(string line)
         {
             var parts = line.Split('|');
             if (parts.Length < 3)

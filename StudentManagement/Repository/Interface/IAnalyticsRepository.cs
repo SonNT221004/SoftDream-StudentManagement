@@ -9,10 +9,10 @@ namespace StudentManagement.Repository.Interface
 {
     public interface IAnalyticsRepository
     {
-        public Task<(string[] Locations, int[] NumberOfStudent)> GetStudentCountByAddressAsync();
-        public Task<(string[] TeacherNames, int[] NumberOfClass)> GetClassCountPerTeacherAsync();
-        public Task<int> GetTotalNumberOfStudents();
-        public Task<int> GetTotalNumberOfClasses();
-        public Task<int> GetTotalNumberOfTeachers();
+        public Task<(string[] Locations, int[] NumberOfStudent)> GetStudentCountByAddressAsync(CancellationToken cancellationToken);
+        public Task<(string[] TeacherNames, int[] NumberOfClass)> GetClassCountPerTeacherAsync(CancellationToken cancellationToken);
+        public Task<int> GetTotalNumberOfStudents(CancellationToken cancellationToken);
+        public Task<int> GetTotalNumberOfClasses(CancellationToken cancellationToken);
+        public Task<int> GetTotalNumberOfTeachers(CancellationToken cancellationToken);
     }
 }

@@ -9,11 +9,11 @@ namespace StudentManagement.Service.Interface
 {
     public interface IAnalyticsService
     {
-        Task<List<LocationCountDto>> GetStudentCountByAddressAsync();
-        Task<List<TeacherClassCountDto>> GetClassCountPerTeacherAsync();
-        public Task<int> GetTotalNumberOfStudents();
-        public Task<int> GetTotalNumberOfClasses();
-        public Task<int> GetTotalNumberOfTeachers();
+        Task<List<LocationCountDto>> GetStudentCountByAddressAsync(CancellationToken cancellationToken);
+        Task<List<TeacherClassCountDto>> GetClassCountPerTeacherAsync(CancellationToken cancellationToken);
+        public Task<int> GetTotalNumberOfStudents(CancellationToken cancellationToken);
+        public Task<int> GetTotalNumberOfClasses(CancellationToken cancellationToken);
+        public Task<int> GetTotalNumberOfTeachers(CancellationToken cancellationToken);
 
 
     }

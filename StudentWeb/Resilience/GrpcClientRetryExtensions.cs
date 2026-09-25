@@ -3,6 +3,7 @@ using Grpc.Net.ClientFactory;
 using Polly;
 using Polly.CircuitBreaker;
 using Polly.Retry;
+using Polly.Timeout;
 using StudentWeb.Resilience.ConnectionState;
 using StudentWeb.Resilience.MyInterceptor;
 
@@ -73,38 +74,30 @@ public static class GrpcClientRetryExtensions
     int delayMilliseconds)
     {
         pipeline
-            .AddRetry(new RetryStrategyOptions
-            {
-                MaxRetryAttempts = maxRetryAttempts,
-                Delay = TimeSpan.FromMilliseconds(delayMilliseconds),
-                BackoffType = DelayBackoffType.Exponential,
-                UseJitter = true,
-                ShouldHandle = new PredicateBuilder()
-                    .Handle<RpcException>(ex => IsTransient(ex.StatusCode))
-            })
-            .AddCircuitBreaker(new CircuitBreakerStrategyOptions
-            {
-                FailureRatio = 1.0,
-                SamplingDuration = TimeSpan.FromSeconds(30),
-                MinimumThroughput = 2,
-                BreakDuration = TimeSpan.FromSeconds(20),
-                ShouldHandle = new PredicateBuilder()
-                    .Handle<RpcException>(ex => IsTransient(ex.StatusCode)),
-                OnOpened = _ =>
-                {
-                    Console.WriteLine("Circuit OPENED");
-                    return default;
-                },
-                OnHalfOpened = _ =>
-                {
-                    Console.WriteLine("Circuit HALF-OPENED");
-                    return default;
-                },
-                OnClosed = _ =>
-                {
-                    Console.WriteLine("Circuit CLOSED");
-                    return default;
-                }
-            });
+     .AddRetry(new RetryStrategyOptions
+     {
+         MaxRetryAttempts = maxRetryAttempts,
+         Delay = TimeSpan.FromMilliseconds(delayMilliseconds),
+         BackoffType = DelayBackoffType.Exponential,
+         UseJitter = true,
+         ShouldHandle = new PredicateBuilder()
+             .Handle<RpcException>(ex => IsTransient(ex.StatusCode)),
+         OnRetry = args =>
+         {
+             Console.WriteLine(
+                 $"Retry {args.AttemptNumber + 1}/{maxRetryAttempts}");
+
+             return default;
+         }
+     })
+     .AddCircuitBreaker(new CircuitBreakerStrategyOptions
+     {
+         FailureRatio = 1.0,
+         SamplingDuration = TimeSpan.FromSeconds(30),
+         MinimumThroughput = 2,
+         BreakDuration = TimeSpan.FromSeconds(20),
+         ShouldHandle = new PredicateBuilder()
+             .Handle<RpcException>(ex => IsTransient(ex.StatusCode))
+     });
     }
 }

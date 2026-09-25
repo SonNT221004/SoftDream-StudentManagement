@@ -21,7 +21,9 @@ namespace StudentManagement.Grpc
 
         public override async Task<GetAllStudentsResponse> GetAllStudents(GetAllStudentsRequest request, ServerCallContext context)
         {
-            var students = await _studentService.GetAllStudentsAsync(request.Page, request.PageSize);
+            await Task.Delay(
+        TimeSpan.FromSeconds(8));
+            var students = await _studentService.GetAllStudentsAsync(request.Page, request.PageSize, context.CancellationToken);
             var response = new GetAllStudentsResponse
             {
                 TotalCount = students.TotalCount
@@ -35,7 +37,7 @@ namespace StudentManagement.Grpc
 
         public override async Task<GetStudentByIdResponse> GetStudentById(GetStudentByIdRequest request, ServerCallContext context)
         {
-            var student = await _studentService.GetStudentByIdAsync(request.Id);
+            var student = await _studentService.GetStudentByIdAsync(request.Id, context.CancellationToken);
             StudentDto response = _mapper.Map<StudentDto>(student);
             return new GetStudentByIdResponse { Student = response == null ? null : response };
         }
@@ -43,7 +45,7 @@ namespace StudentManagement.Grpc
         public override async Task<AddStudentResponse> AddStudent(AddStudentRequest request, ServerCallContext context)
         {
             var addStudentDto = _mapper.Map<DTO.Student.AddStudentDTO>(request.Student);
-            var createdStudent = await _studentService.CreateStudentAsync(addStudentDto);
+            var createdStudent = await _studentService.CreateStudentAsync(addStudentDto, context.CancellationToken);
             StudentDto response = _mapper.Map<StudentDto>(createdStudent);
             return new AddStudentResponse { Student = response };
         }
@@ -51,20 +53,20 @@ namespace StudentManagement.Grpc
         public override async Task<UpdateStudentResponse> UpdateStudent(UpdateStudentRequest request, ServerCallContext context)
         {
             var student = _mapper.Map<DTO.Student.UpdateStudentDTO>(request.Student);
-            var updatedStudent = await _studentService.UpdateStudentAsync(student);
+            var updatedStudent = await _studentService.UpdateStudentAsync(student , context.CancellationToken);
             StudentDto response = _mapper.Map<StudentDto>(updatedStudent);
             return new UpdateStudentResponse { Student = response == null ? null : response };
         }
 
         public override async Task<DeleteStudentResponse> DeleteStudent(DeleteStudentRequest request, ServerCallContext context)
         {
-            var success = await _studentService.DeleteStudentAsync(request.Id);
+            var success = await _studentService.DeleteStudentAsync(request.Id , context.CancellationToken);
             return new DeleteStudentResponse { Success = success };
         }
 
         public override async Task<GetAllStudentsResponse> ArrangeStudentsByName(GetAllStudentsRequest request, ServerCallContext context)
         {
-            var students = await _studentService.ArrangeStudentsByNameAsync();
+            var students = await _studentService.ArrangeStudentsByNameAsync(context.CancellationToken);
             var response = new GetAllStudentsResponse();
             foreach (var s in students)
             {

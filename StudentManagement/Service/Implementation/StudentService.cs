@@ -3,11 +3,6 @@ using StudentManagement.DTO.Student;
 using StudentManagement.Model;
 using StudentManagement.Repository.Interface;
 using StudentManagement.Service.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace StudentManagement.Service.Implementation
 {
@@ -21,42 +16,42 @@ namespace StudentManagement.Service.Implementation
             _studentRepository = studentRepository ?? throw new ArgumentNullException(nameof(studentRepository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
-        public async Task<List<ViewStudentListDTO>> ArrangeStudentsByNameAsync()
+        public async Task<List<ViewStudentListDTO>> ArrangeStudentsByNameAsync(CancellationToken cancellationToken)
         {
-           var students = await _studentRepository.GetAllStudentsAsync(0,0);
+           var students = await _studentRepository.GetAllStudentsAsync(0,0, cancellationToken);
            var studentDTOs = _mapper.Map<List<ViewStudentListDTO>>(students);
            return studentDTOs.OrderBy(s => s.Name).ToList();
         }
 
-        public async Task<ViewStudentDTO> CreateStudentAsync(AddStudentDTO student)
+        public async Task<ViewStudentDTO> CreateStudentAsync(AddStudentDTO student, CancellationToken cancellationToken)
         {
             var studentEntity = _mapper.Map<Student>(student);
-            var addedStudent = await _studentRepository.AddStudentAsync(studentEntity, student.ClassIds.ToList());
+            var addedStudent = await _studentRepository.AddStudentAsync(studentEntity, student.ClassIds.ToList(), cancellationToken);
             return _mapper.Map<ViewStudentDTO>(addedStudent);
         }
 
-        public Task<bool> DeleteStudentAsync(int id)
+        public Task<bool> DeleteStudentAsync(int id, CancellationToken cancellationToken)
         {
-            return _studentRepository.DeleteStudentAsync(id);
+            return _studentRepository.DeleteStudentAsync(id, cancellationToken);
         }
 
-        public async Task<(List<ViewStudentListDTO> Students, int TotalCount)> GetAllStudentsAsync(int page, int pageSize)
+        public async Task<(List<ViewStudentListDTO> Students, int TotalCount)> GetAllStudentsAsync(int page, int pageSize, CancellationToken cancellationToken)
         {
-            var total = await _studentRepository.CountStudentsAsync();
-            var students = await _studentRepository.GetAllStudentsAsync(page, pageSize);
+            var total = await _studentRepository.CountStudentsAsync(cancellationToken);
+            var students = await _studentRepository.GetAllStudentsAsync(page, pageSize, cancellationToken);
             return (_mapper.Map<List<ViewStudentListDTO>>(students), total);
         }
 
-        public async Task<ViewStudentDTO?> GetStudentByIdAsync(int id)
+        public async Task<ViewStudentDTO?> GetStudentByIdAsync(int id, CancellationToken cancellationToken)
         {
-            var student = await _studentRepository.GetStudentByIdAsync(id);
+            var student = await _studentRepository.GetStudentByIdAsync(id, cancellationToken);
             return _mapper.Map<ViewStudentDTO?>(student);
         }
 
-        public async Task<ViewStudentDTO?> UpdateStudentAsync(UpdateStudentDTO student)
+        public async Task<ViewStudentDTO?> UpdateStudentAsync(UpdateStudentDTO student, CancellationToken cancellationToken)
         {
             var studentEntity = _mapper.Map<Student>(student);
-            var updatedStudent = await _studentRepository.UpdateStudentAsync(studentEntity, student.ClassIds.ToList());
+            var updatedStudent = await _studentRepository.UpdateStudentAsync(studentEntity, student.ClassIds.ToList(), cancellationToken);
             return _mapper.Map<ViewStudentDTO?>(updatedStudent);
         }
     }

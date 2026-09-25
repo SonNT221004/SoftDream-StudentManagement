@@ -21,9 +21,9 @@ namespace StudentManagement.Repository.Implementation
             _classRepository = classRepository ?? throw new ArgumentNullException(nameof(classRepository));
             _teacherRepository = teacherRepository ?? throw new ArgumentNullException(nameof(teacherRepository));
         }
-        public async Task<(string[] TeacherNames, int[] NumberOfClass)> GetClassCountPerTeacherAsync()
+        public async Task<(string[] TeacherNames, int[] NumberOfClass)> GetClassCountPerTeacherAsync(CancellationToken cancellationToken)
         {
-            var classes = await _classRepository.GetAllClassesAsync();
+            var classes = await _classRepository.GetAllClassesAsync(cancellationToken);
             var classesGroupByTeacher = classes
             .GroupBy(s => string.IsNullOrWhiteSpace(s.Teacher?.Name) ? "N/A" : s.Teacher.Name)
             .Select(g => new { TeacherNames = g.Key, Count = g.Count() })
@@ -36,9 +36,9 @@ namespace StudentManagement.Repository.Implementation
             return (teacherNames, NumberOfClass);
         }
 
-        public async Task<(string[] Locations, int[] NumberOfStudent)> GetStudentCountByAddressAsync()
+        public async Task<(string[] Locations, int[] NumberOfStudent)> GetStudentCountByAddressAsync(CancellationToken cancellationToken)
         {
-            var students = await _studentRepository.GetAllStudentsAsync(0,0);
+            var students = await _studentRepository.GetAllStudentsAsync(0,0, cancellationToken);
             var studentsGroupByAddresses = students
             .GroupBy(s => string.IsNullOrWhiteSpace(s.Address) ? "N/A" : s.Address)
             .Select(g => new { Address = g.Key, Count = g.Count() })
@@ -52,19 +52,19 @@ namespace StudentManagement.Repository.Implementation
 
         }
 
-        public async Task<int> GetTotalNumberOfClasses()
+        public async Task<int> GetTotalNumberOfClasses(CancellationToken cancellationToken)
         {
-            return await _classRepository.CountClassesAsync();
+            return await _classRepository.CountClassesAsync(cancellationToken);
         } 
 
-        public async Task<int> GetTotalNumberOfStudents()
+        public async Task<int> GetTotalNumberOfStudents(CancellationToken cancellationToken)
         {
-            return await _studentRepository.CountStudentsAsync();
+            return await _studentRepository.CountStudentsAsync(cancellationToken);
         }
 
-        public async Task<int> GetTotalNumberOfTeachers()
+        public async Task<int> GetTotalNumberOfTeachers(CancellationToken cancellationToken)
         {
-            return await _teacherRepository.CountTeachersAsync();
+            return await _teacherRepository.CountTeachersAsync(cancellationToken);
         }
     }
 }

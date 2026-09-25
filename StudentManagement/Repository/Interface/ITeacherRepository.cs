@@ -4,8 +4,8 @@ namespace StudentManagement.Repository.Interface
 {
     public interface ITeacherRepository
     {
-        public Task<Teacher?> GetTeacherByIdAsync(int id);
-        public Task<int> CountTeachersAsync();
+        public Task<Teacher?> GetTeacherByIdAsync(int id, CancellationToken cancellationToken);
+        public Task<int> CountTeachersAsync(CancellationToken cancellationToken);
 
     }
 }

@@ -26,15 +26,15 @@ namespace StudentManagement.Dal.Implementation
             _filePath = Path.Combine(storageDirectory, "Student.txt");
         }
 
-        public async Task<List<Student>> GetAllStudentsAsync(int page, int pageSize)
+        public async Task<List<Student>> GetAllStudentsAsync(int page, int pageSize, CancellationToken cancellationToken)
         {
-            await _fileLock.WaitAsync();
+            await _fileLock.WaitAsync(cancellationToken);
             try
             {
                 if (!File.Exists(_filePath))
                     return new List<Student>();
 
-                var lines = await File.ReadAllLinesAsync(_filePath);
+                var lines = await File.ReadAllLinesAsync(_filePath, cancellationToken);
                 var list = new List<Student>();
                 foreach (var line in lines)
                 {
@@ -60,15 +60,15 @@ namespace StudentManagement.Dal.Implementation
             }
         }
 
-        public async Task<Student?> GetStudentByIdAsync(int id)
+        public async Task<Student?> GetStudentByIdAsync(int id, CancellationToken cancellationToken)
         {
-            await _fileLock.WaitAsync();
+            await _fileLock.WaitAsync(cancellationToken);
             try
             {
                 if (!File.Exists(_filePath))
                     return null;
 
-                var lines = await File.ReadAllLinesAsync(_filePath);
+                var lines = await File.ReadAllLinesAsync(_filePath, cancellationToken);
                 foreach (var line in lines)
                 {
                     if (string.IsNullOrWhiteSpace(line))
@@ -86,15 +86,15 @@ namespace StudentManagement.Dal.Implementation
             }
         }
 
-        public async Task<Student> AddStudentAsync(Student student)
+        public async Task<Student> AddStudentAsync(Student student, CancellationToken cancellationToken)
         {
-            await _fileLock.WaitAsync();
+            await _fileLock.WaitAsync(cancellationToken);
             try
             {
                 int nextId = 1;
                 if (File.Exists(_filePath))
                 {
-                    var lines = await File.ReadAllLinesAsync(_filePath);
+                    var lines = await File.ReadAllLinesAsync(_filePath, cancellationToken);
                     var maxId = lines.Select(l =>
                     {
                         var parts = l.Split('|');
@@ -106,7 +106,7 @@ namespace StudentManagement.Dal.Implementation
 
                 student.Id = nextId;
                 var line = FormatStudentLine(student);
-                await File.AppendAllTextAsync(_filePath, line + Environment.NewLine);
+                await File.AppendAllTextAsync(_filePath, line + Environment.NewLine, cancellationToken);
                 return student;
             }
             finally
@@ -115,15 +115,15 @@ namespace StudentManagement.Dal.Implementation
             }
         }
 
-        public async Task<Student?> UpdateStudentAsync(Student student)
+        public async Task<Student?> UpdateStudentAsync(Student student, CancellationToken cancellationToken)
         {
-            await _fileLock.WaitAsync();
+            await _fileLock.WaitAsync(cancellationToken);
             try
             {
                 if (!File.Exists(_filePath))
                     return null;
 
-                var lines = (await File.ReadAllLinesAsync(_filePath)).ToList();
+                var lines = (await File.ReadAllLinesAsync(_filePath, cancellationToken)).ToList();
                 bool found = false;
                 for (int i = 0; i < lines.Count; i++)
                 {
@@ -139,7 +139,7 @@ namespace StudentManagement.Dal.Implementation
                 if (!found)
                     return null;
 
-                await File.WriteAllLinesAsync(_filePath, lines);
+                await File.WriteAllLinesAsync(_filePath, lines, cancellationToken);
                 return student;
             }
             finally
@@ -148,15 +148,15 @@ namespace StudentManagement.Dal.Implementation
             }
         }
 
-        public async Task<bool> DeleteStudentAsync(int id)
+        public async Task<bool> DeleteStudentAsync(int id, CancellationToken cancellationToken)
         {
-            await _fileLock.WaitAsync();
+            await _fileLock.WaitAsync(cancellationToken);
             try
             {
                 if (!File.Exists(_filePath))
                     return false;
 
-                var lines = (await File.ReadAllLinesAsync(_filePath)).ToList();
+                var lines = (await File.ReadAllLinesAsync(_filePath, cancellationToken)).ToList();
                 var initialCount = lines.Count;
                 lines = lines.Where(l =>
                 {
@@ -167,7 +167,7 @@ namespace StudentManagement.Dal.Implementation
                 if (lines.Count == initialCount)
                     return false;
 
-                await File.WriteAllLinesAsync(_filePath, lines);
+                await File.WriteAllLinesAsync(_filePath, lines, cancellationToken);
                 return true;
             }
             finally
@@ -229,15 +229,15 @@ namespace StudentManagement.Dal.Implementation
         private static string Escape(string s) => s?.Replace("|", " ")?.Replace("\r", " ")?.Replace("\n", " ") ?? string.Empty;
         private static string Unescape(string s) => s?.Trim() ?? string.Empty;
 
-        public async Task<int> CountStudentsAsync()
+        public async Task<int> CountStudentsAsync(CancellationToken cancellationToken)
         {
-            await _fileLock.WaitAsync();
+            await _fileLock.WaitAsync(cancellationToken);
             try
             {
                 if (!File.Exists(_filePath))
                     return 0;
 
-                var lines = await File.ReadAllLinesAsync(_filePath);
+                var lines = await File.ReadAllLinesAsync(_filePath, cancellationToken);
                 var count = 0;
 
                 foreach (var line in lines)

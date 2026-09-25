@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace StudentManagement.Service.Implementation
@@ -17,9 +18,9 @@ namespace StudentManagement.Service.Implementation
         {
             _analyticsRepository = analyticsRepository ?? throw new ArgumentNullException(nameof(analyticsRepository));
         }
-        public async Task<List<TeacherClassCountDto>> GetClassCountPerTeacherAsync()
+        public async Task<List<TeacherClassCountDto>> GetClassCountPerTeacherAsync(CancellationToken cancellationToken)
         {
-            var result = await _analyticsRepository.GetClassCountPerTeacherAsync();
+            var result = await _analyticsRepository.GetClassCountPerTeacherAsync(cancellationToken);
 
             var teacherClassCount = new List<TeacherClassCountDto>();
 
@@ -35,9 +36,9 @@ namespace StudentManagement.Service.Implementation
             return teacherClassCount;
         }
 
-        public async Task<List<LocationCountDto>> GetStudentCountByAddressAsync()
+        public async Task<List<LocationCountDto>> GetStudentCountByAddressAsync(CancellationToken cancellationToken)
         {
-            var result = await _analyticsRepository.GetStudentCountByAddressAsync();
+            var result = await _analyticsRepository.GetStudentCountByAddressAsync(cancellationToken);
 
             var studentAddressCount = new List<LocationCountDto>();
 
@@ -53,19 +54,19 @@ namespace StudentManagement.Service.Implementation
             return studentAddressCount;
         }
 
-        public async Task<int> GetTotalNumberOfClasses()
+        public async Task<int> GetTotalNumberOfClasses(CancellationToken cancellationToken)
         {
-            return await _analyticsRepository.GetTotalNumberOfClasses();
+            return await _analyticsRepository.GetTotalNumberOfClasses(cancellationToken);
         }
 
-        public async Task<int> GetTotalNumberOfStudents()
+        public async Task<int> GetTotalNumberOfStudents(CancellationToken cancellationToken)
         {
-            return await _analyticsRepository.GetTotalNumberOfStudents();
+            return await _analyticsRepository.GetTotalNumberOfStudents(cancellationToken);
         }
 
-        public async Task<int> GetTotalNumberOfTeachers()
+        public async Task<int> GetTotalNumberOfTeachers(CancellationToken cancellationToken)
         {
-            return await _analyticsRepository.GetTotalNumberOfTeachers();
+            return await _analyticsRepository.GetTotalNumberOfTeachers(cancellationToken);
         }
     }
 }

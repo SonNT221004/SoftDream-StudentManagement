@@ -9,9 +9,9 @@ namespace StudentManagement.Dal.Interface
 {
     public interface IClassDAO
     {
-        public Task<List<Class>> GetAllClassesAsync();
-        public Task<List<Class>> GetClassesByIdsAsync(IEnumerable<int> ids);
+        public Task<List<Class>> GetAllClassesAsync(CancellationToken cancellationToken);
+        public Task<List<Class>> GetClassesByIdsAsync(IEnumerable<int> ids, CancellationToken cancellationToken);
 
-        public Task<int> CountClassesAsync();
+        public Task<int> CountClassesAsync(CancellationToken cancellationToken);
     }
 }

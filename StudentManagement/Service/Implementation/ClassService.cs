@@ -17,9 +17,9 @@ namespace StudentManagement.Service.Implementation
         {
             _classRepository = classRepository ?? throw new ArgumentNullException(nameof(classRepository));
         }
-        public Task<List<Class>> GetAllClassesAsync()
+        public Task<List<Class>> GetAllClassesAsync(CancellationToken cancellationToken)
         {
-            return _classRepository.GetAllClassesAsync();
+            return _classRepository.GetAllClassesAsync(cancellationToken);
         }
     }
 }

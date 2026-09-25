@@ -9,7 +9,7 @@ namespace StudentManagement.Dal.Interface
 {
     public interface ITeacherDAO
     {
-        public Task<Teacher?> GetTeacherById(int id);
-        public Task<int> CountTeachersAsync();
+        public Task<Teacher?> GetTeacherById(int id, CancellationToken cancellationToken);
+        public Task<int> CountTeachersAsync(CancellationToken cancellationToken);
     }
 }

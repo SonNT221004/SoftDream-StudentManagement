@@ -9,6 +9,6 @@ namespace StudentManagement.Service.Interface
 {
     public interface IClassService
     {
-        public Task<List<Class>> GetAllClassesAsync();
+        public Task<List<Class>> GetAllClassesAsync(CancellationToken cancellationToken);
     }
 }

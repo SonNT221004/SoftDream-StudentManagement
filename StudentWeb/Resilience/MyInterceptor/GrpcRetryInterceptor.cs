@@ -50,7 +50,9 @@ public abstract class GrpcRetryInterceptor : Interceptor
             var result = await _pipeline.ExecuteAsync(
                 async (ctx, ct) =>
                 {
-                    var options = context.Options.WithCancellationToken(ct);
+                    var options = context.Options
+                        .WithCancellationToken(ct)
+                        .WithDeadline(DateTime.UtcNow.AddSeconds(5));
                     var retryContext = new ClientInterceptorContext<TRequest, TResponse>(
                         context.Method,
                         context.Host,

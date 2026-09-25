@@ -18,28 +18,28 @@ namespace StudentManagement.Repository.Implementation
             _teacherRepository = teacherRepository ?? throw new ArgumentNullException(nameof(teacherRepository));
         }
 
-        public async Task<int> CountClassesAsync()
+        public async Task<int> CountClassesAsync(CancellationToken cancellationToken)
         {
-            return await _classDao.CountClassesAsync();
+            return await _classDao.CountClassesAsync(cancellationToken);
         }
 
-        public async Task<List<Class>> GetAllClassesAsync()
+        public async Task<List<Class>> GetAllClassesAsync(CancellationToken cancellationToken)
         {
-            var classesTask = await _classDao.GetAllClassesAsync();
+            var classesTask = await _classDao.GetAllClassesAsync(cancellationToken);
             foreach (var cls in classesTask)
             {
                 if (cls.Teacher != null && cls.Teacher.Id > 0)
                 {
-                    var teacher = await _teacherRepository.GetTeacherByIdAsync(cls.Teacher.Id);
+                    var teacher = await _teacherRepository.GetTeacherByIdAsync(cls.Teacher.Id, cancellationToken);
                     cls.Teacher = teacher;
                 }
             }
             return classesTask;
         }
 
-        public Task<List<Class>> GetClassesByIdsAsync(IEnumerable<int> ids)
+        public Task<List<Class>> GetClassesByIdsAsync(IEnumerable<int> ids, CancellationToken cancellationToken)
         {
-            return _classDao.GetClassesByIdsAsync(ids);
+            return _classDao.GetClassesByIdsAsync(ids, cancellationToken);
         }
     }
 }

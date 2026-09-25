@@ -9,8 +9,8 @@ namespace StudentManagement.Repository.Interface
 {
     public interface IClassRepository
     {
-        public Task<List<Class>> GetAllClassesAsync();
-        public Task<List<Class>> GetClassesByIdsAsync(IEnumerable<int> ids);
-        public Task<int> CountClassesAsync();
+        public Task<List<Class>> GetAllClassesAsync(CancellationToken cancellationToken);
+        public Task<List<Class>> GetClassesByIdsAsync(IEnumerable<int> ids, CancellationToken cancellationToken);
+        public Task<int> CountClassesAsync(CancellationToken cancellationToken);
     }
 }

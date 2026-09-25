@@ -15,7 +15,7 @@ namespace StudentManagement.Grpc
 
         public override async Task<GetClassCountPerTeacherResponse> GetClassCountPerTeacher(GetClassCountPerTeacherRequest request, ServerCallContext context)
         {
-            var classTeacher = await _analyticsService.GetClassCountPerTeacherAsync();
+            var classTeacher = await _analyticsService.GetClassCountPerTeacherAsync(context.CancellationToken);
             var response = new GetClassCountPerTeacherResponse();
             foreach(var cl in classTeacher)
             {
@@ -29,7 +29,7 @@ namespace StudentManagement.Grpc
 
         public override async Task<GetStudentCountByAddressResponse> GetStudentCountByAddress(GetStudentCountByAddressRequest request, ServerCallContext context)
         {
-            var studentAddress = await _analyticsService.GetStudentCountByAddressAsync();
+            var studentAddress = await _analyticsService.GetStudentCountByAddressAsync(context.CancellationToken);
             var response = new GetStudentCountByAddressResponse();
             foreach (var sa in studentAddress)
             {
@@ -42,21 +42,21 @@ namespace StudentManagement.Grpc
 
         public override async Task<GetTotalNumberOfClassesResponse> GetTotalNumberOfClasses(GetTotalNumberOfClassesRequest request, ServerCallContext context)
         {
-            int totalNumberOfClasses = await _analyticsService.GetTotalNumberOfClasses();
+            int totalNumberOfClasses = await _analyticsService.GetTotalNumberOfClasses(context.CancellationToken);
             var response = new GetTotalNumberOfClassesResponse { NumberOfClass = totalNumberOfClasses };
             return response;
         }
 
         public override async Task<GetTotalNumberOfStudentsResponse> GetTotalNumberOfStudents(GetTotalNumberOfStudentsRequest request, ServerCallContext context)
         {
-            int totalNumberOfStudents = await _analyticsService.GetTotalNumberOfStudents();
+            int totalNumberOfStudents = await _analyticsService.GetTotalNumberOfStudents(context.CancellationToken);
             var response = new GetTotalNumberOfStudentsResponse { NumberOfStudent = totalNumberOfStudents };
             return response;
         }
 
         public override async Task<GetTotalNumberOfTeachersResponse> GetTotalNumberOfTeachers(GetTotalNumberOfTeachersRequest request, ServerCallContext context)
         {
-            int totalNumberOfTeachers = await _analyticsService.GetTotalNumberOfTeachers();
+            int totalNumberOfTeachers = await _analyticsService.GetTotalNumberOfTeachers(context.CancellationToken);
             var response = new GetTotalNumberOfTeachersResponse { NumberOfTeacher = totalNumberOfTeachers };
             return response;
         }

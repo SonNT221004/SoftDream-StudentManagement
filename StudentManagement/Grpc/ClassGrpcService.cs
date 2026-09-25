@@ -16,7 +16,7 @@ namespace StudentManagement.Grpc
         }
         public override async Task<GetAllClassesResponse> GetAllClasses(GetAllClassesRequest request, ServerCallContext context)
         {
-            var classes = await _classService.GetAllClassesAsync();
+            var classes = await _classService.GetAllClassesAsync(context.CancellationToken);
             var response = new GetAllClassesResponse();
             foreach (var c in classes)
             {
