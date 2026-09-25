@@ -1,6 +1,7 @@
 using Grpc.Core;
 using Grpc.Net.ClientFactory;
 using Polly;
+using Polly.CircuitBreaker;
 using Polly.Retry;
 
 namespace StudentWeb.Resilience;
@@ -44,11 +45,41 @@ public static class GrpcClientRetryExtensions
                     return default;
                 }
             });
+
+            pipeline.AddCircuitBreaker(new CircuitBreakerStrategyOptions
+            {
+                FailureRatio = 1.0,
+                SamplingDuration = TimeSpan.FromSeconds(30),
+                MinimumThroughput = 2,
+                BreakDuration = TimeSpan.FromSeconds(60),
+
+                ShouldHandle = new PredicateBuilder()
+        .Handle<RpcException>(ex => IsTransient(ex.StatusCode)),
+
+                OnOpened = args =>
+                {
+                    Console.WriteLine("Circuit OPENED");
+                    return default;
+                },
+
+                OnHalfOpened = args =>
+                {
+                    Console.WriteLine("Circuit HALF-OPENED");
+                    return default;
+                },
+
+                OnClosed = args =>
+                {
+                    Console.WriteLine("Circuit CLOSED");
+                    return default;
+                }
+            });
+
         });
 
+           
         return services;
     }
-
     public static IHttpClientBuilder AddGrpcTransientRetry(this IHttpClientBuilder httpClientBuilder)
     {
         return httpClientBuilder.AddInterceptor<GrpcRetryInterceptor>(InterceptorScope.Client);
