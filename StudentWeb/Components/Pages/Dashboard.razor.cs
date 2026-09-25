@@ -16,8 +16,8 @@ namespace StudentWeb.Components.Pages
 
         private string? errorMessage;
         private bool isLoading;
-        private object[] studentAddressInfo = Array.Empty<object>();
-        private object[] teacherClassInfo = Array.Empty<object>();
+        private object[] studentAddressInfo = [];
+        private object[] teacherClassInfo = [];
         private int totalStudents;
         private int totalTeachers;
         private int totalClasses;
@@ -43,22 +43,20 @@ namespace StudentWeb.Components.Pages
                 errorMessage = null;
                 var studentAddress = await AnalyticsService.GetStudentCountByAddressAsync();
 
-                studentAddressInfo = studentAddress
+                studentAddressInfo = [.. studentAddress
                     .Select(sa => (object)new
-                    {
-                        LocationName = sa.LocationName,
-                        NumberOfStudent = sa.NumberOfStudent
-                    })
-                    .ToArray();
+                    { 
+                        sa.LocationName,
+                        sa.NumberOfStudent
+                    })];
 
                 var teacherClass = await AnalyticsService.GetClassCountPerTeacherAsync();
-                teacherClassInfo = teacherClass
+                teacherClassInfo = [.. teacherClass
                     .Select(sa => (object)new
                     {
-                        TeacherName = sa.TeacherName,
-                        NumberOfClass = sa.NumberOfClass
-                    })
-                    .ToArray();
+                        sa.TeacherName,
+                        sa.NumberOfClass
+                    })];
 
                 totalStudents = await AnalyticsService.GetTotalNumberOfStudents();
                 totalClasses = await AnalyticsService.GetTotalNumberOfClasses();
@@ -74,10 +72,7 @@ namespace StudentWeb.Components.Pages
             }
         }
 
-        public void Dispose()
-        {
-            Connection.Changed -= OnConnectionChanged;
-        }
+        public void Dispose() => Connection.Changed -= OnConnectionChanged;
 
         private void CloseErrorPopup() => errorMessage = null;
 
@@ -93,7 +88,7 @@ namespace StudentWeb.Components.Pages
             }
         };
 
-        readonly PieConfig configForPie = new PieConfig
+        readonly PieConfig configForPie = new()
         {
             AutoFit = true,
             Radius = 0.8,

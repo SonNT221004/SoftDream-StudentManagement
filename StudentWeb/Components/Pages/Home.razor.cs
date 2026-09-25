@@ -106,12 +106,25 @@ namespace StudentWeb.Components.Pages
 
         private async Task ReloadStudentsAsync()
         {
-            var response = await StudentService.GetAllStudentsAsync(currentPage);
-            students = response.Students;
-            totalCount = response.TotalCount;
-            if (isArranged)
+            try
             {
-                students = students.OrderBy(student => student.Name).ToList();
+                errorMessage = null;
+                isLoading = true;
+                var (Students, TotalCount) = await StudentService.GetAllStudentsAsync(currentPage);
+                students = Students;
+                totalCount = TotalCount;
+                if (isArranged)
+                {
+                    students = [.. students.OrderBy(student => student.Name)];
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+            }
+            finally
+            {
+                isLoading = false;
             }
         }
 
@@ -224,13 +237,13 @@ namespace StudentWeb.Components.Pages
         {
             if (!isArranged)
             {
-                students = students.OrderBy(student => student.Name).ToList();
+                students = [.. students.OrderBy(student => student.Name)];
                 arrangeButtonName = "Cancel Arrangement";
                 isArranged = true;
             }
             else
             {
-                students = students.OrderBy(student => student.Id).ToList();
+                students = [.. students.OrderBy(student => student.Id)];
                 arrangeButtonName = "Arrange By Name";
                 isArranged = false;
             }
@@ -250,7 +263,7 @@ namespace StudentWeb.Components.Pages
                 Name = selectedStudent.Name,
                 DateOfBirth = selectedStudent.DateOfBirth,
                 Address = selectedStudent.Address,
-                ClassIds = selectedStudent.Classes.Select(c => c.Id).ToArray()
+                ClassIds = [.. selectedStudent.Classes.Select(c => c.Id)]
             };
 
             CloseStudentDetailPopup();
