@@ -1,16 +1,12 @@
-﻿using StudentManagement.DTO.Analytics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+using StudentManagement.Grpc;
 
 namespace StudentManagement.Service.Interface
 {
     public interface IAnalyticsService
     {
-        Task<List<LocationCountDto>> GetStudentCountByAddressAsync(CancellationToken cancellationToken);
-        Task<List<TeacherClassCountDto>> GetClassCountPerTeacherAsync(CancellationToken cancellationToken);
+        Task<List<StudentAddressDto>> GetStudentCountByAddressAsync(CancellationToken cancellationToken);
+        Task<List<ClassTeacherDto>> GetClassCountPerTeacherAsync(CancellationToken cancellationToken);
         public Task<int> GetTotalNumberOfStudents(CancellationToken cancellationToken);
         public Task<int> GetTotalNumberOfClasses(CancellationToken cancellationToken);
         public Task<int> GetTotalNumberOfTeachers(CancellationToken cancellationToken);

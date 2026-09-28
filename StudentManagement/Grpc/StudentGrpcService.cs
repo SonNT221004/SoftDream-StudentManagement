@@ -44,7 +44,7 @@ namespace StudentManagement.Grpc
 
         public override async Task<AddStudentResponse> AddStudent(AddStudentRequest request, ServerCallContext context)
         {
-            var addStudentDto = _mapper.Map<DTO.Student.AddStudentDTO>(request.Student);
+            var addStudentDto = _mapper.Map<AddStudentDto>(request.Student);
             var createdStudent = await _studentService.CreateStudentAsync(addStudentDto, context.CancellationToken);
             StudentDto response = _mapper.Map<StudentDto>(createdStudent);
             return new AddStudentResponse { Student = response };
@@ -52,7 +52,7 @@ namespace StudentManagement.Grpc
 
         public override async Task<UpdateStudentResponse> UpdateStudent(UpdateStudentRequest request, ServerCallContext context)
         {
-            var student = _mapper.Map<DTO.Student.UpdateStudentDTO>(request.Student);
+            var student = _mapper.Map<UpdateStudentDto>(request.Student);
             var updatedStudent = await _studentService.UpdateStudentAsync(student , context.CancellationToken);
             StudentDto response = _mapper.Map<StudentDto>(updatedStudent);
             return new UpdateStudentResponse { Student = response == null ? null : response };

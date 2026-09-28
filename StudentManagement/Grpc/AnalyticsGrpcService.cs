@@ -34,7 +34,7 @@ namespace StudentManagement.Grpc
             foreach (var sa in studentAddress)
             {
                 StudentAddressDto studentAddressDto = new StudentAddressDto
-                { LocationName = sa.Location, NumberOfStudent = sa.NumberOfStudent };
+                { LocationName = sa.LocationName, NumberOfStudent = sa.NumberOfStudent };
                 response.StudentAddress.Add(studentAddressDto);
             }
             return response;

@@ -1,14 +1,7 @@
 ﻿using AutoMapper;
-using StudentManagement.DTO.Analytics;
-using StudentManagement.Repository.Implementation;
+using StudentManagement.Grpc;
 using StudentManagement.Repository.Interface;
 using StudentManagement.Service.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace StudentManagement.Service.Implementation
 {
@@ -21,18 +14,18 @@ namespace StudentManagement.Service.Implementation
             _analyticsRepository = analyticsRepository ?? throw new ArgumentNullException(nameof(analyticsRepository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
-        public async Task<List<TeacherClassCountDto>> GetClassCountPerTeacherAsync(CancellationToken cancellationToken)
+        public async Task<List<ClassTeacherDto>> GetClassCountPerTeacherAsync(CancellationToken cancellationToken)
         {
             var classesGroupByTeacher = await _analyticsRepository.GetClassCountPerTeacherAsync(cancellationToken);
-            var result = _mapper.Map<List<TeacherClassCountDto>>(classesGroupByTeacher);
+            var result = _mapper.Map<List<ClassTeacherDto>>(classesGroupByTeacher);
             return result;
         }
 
-        public async Task<List<LocationCountDto>> GetStudentCountByAddressAsync(CancellationToken cancellationToken)
+        public async Task<List<StudentAddressDto>> GetStudentCountByAddressAsync(CancellationToken cancellationToken)
         {
             var studentAddressCount = await _analyticsRepository.GetStudentCountByAddressAsync(cancellationToken);
 
-            var result = _mapper.Map<List<LocationCountDto>>(studentAddressCount);
+            var result = _mapper.Map<List<StudentAddressDto>>(studentAddressCount);
 
             return result;
         }

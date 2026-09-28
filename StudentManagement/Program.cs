@@ -10,7 +10,6 @@ using StudentManagement.Automapper;
 using StudentManagement.Dal.Implementation;
 using StudentManagement.Dal.Interface;
 using StudentManagement.Data;
-using StudentManagement.DTO.Student;
 using StudentManagement.Extensions;
 using StudentManagement.Repository.Implementation;
 using StudentManagement.Repository.Interface;
