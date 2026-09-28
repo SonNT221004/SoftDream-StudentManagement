@@ -1,4 +1,5 @@
-﻿using StudentManagement.DTO.Analytics;
+﻿using AutoMapper;
+using StudentManagement.DTO.Analytics;
 using StudentManagement.Repository.Implementation;
 using StudentManagement.Repository.Interface;
 using StudentManagement.Service.Interface;
@@ -14,44 +15,26 @@ namespace StudentManagement.Service.Implementation
     public class AnalyticsService : IAnalyticsService
     {
         private readonly IAnalyticsRepository _analyticsRepository;
-        public AnalyticsService(IAnalyticsRepository analyticsRepository)
+        private readonly IMapper _mapper;
+        public AnalyticsService(IAnalyticsRepository analyticsRepository, IMapper mapper)
         {
             _analyticsRepository = analyticsRepository ?? throw new ArgumentNullException(nameof(analyticsRepository));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
         public async Task<List<TeacherClassCountDto>> GetClassCountPerTeacherAsync(CancellationToken cancellationToken)
         {
-            var result = await _analyticsRepository.GetClassCountPerTeacherAsync(cancellationToken);
-
-            var teacherClassCount = new List<TeacherClassCountDto>();
-
-            for (int i = 0; i < result.TeacherNames.Length; i++)
-            {
-                teacherClassCount.Add(new TeacherClassCountDto
-                {
-                    TeacherName = result.TeacherNames[i],
-                    NumberOfClass = result.NumberOfClass[i]
-                });
-            }
-
-            return teacherClassCount;
+            var classesGroupByTeacher = await _analyticsRepository.GetClassCountPerTeacherAsync(cancellationToken);
+            var result = _mapper.Map<List<TeacherClassCountDto>>(classesGroupByTeacher);
+            return result;
         }
 
         public async Task<List<LocationCountDto>> GetStudentCountByAddressAsync(CancellationToken cancellationToken)
         {
-            var result = await _analyticsRepository.GetStudentCountByAddressAsync(cancellationToken);
+            var studentAddressCount = await _analyticsRepository.GetStudentCountByAddressAsync(cancellationToken);
 
-            var studentAddressCount = new List<LocationCountDto>();
+            var result = _mapper.Map<List<LocationCountDto>>(studentAddressCount);
 
-            for (int i = 0; i < result.Locations.Length; i++)
-            {
-                studentAddressCount.Add(new LocationCountDto
-                {
-                    Location = result.Locations[i],
-                    NumberOfStudent = result.NumberOfStudent[i]
-                });
-            }
-
-            return studentAddressCount;
+            return result;
         }
 
         public async Task<int> GetTotalNumberOfClasses(CancellationToken cancellationToken)

@@ -21,34 +21,30 @@ namespace StudentManagement.Repository.Implementation
             _classRepository = classRepository ?? throw new ArgumentNullException(nameof(classRepository));
             _teacherRepository = teacherRepository ?? throw new ArgumentNullException(nameof(teacherRepository));
         }
-        public async Task<(string[] TeacherNames, int[] NumberOfClass)> GetClassCountPerTeacherAsync(CancellationToken cancellationToken)
+        public async Task<List<(string TeacherName, int Count)>> GetClassCountPerTeacherAsync(CancellationToken cancellationToken)
         {
             var classes = await _classRepository.GetAllClassesAsync(cancellationToken);
+
             var classesGroupByTeacher = classes
-            .GroupBy(s => string.IsNullOrWhiteSpace(s.Teacher?.Name) ? "N/A" : s.Teacher.Name)
-            .Select(g => new { TeacherNames = g.Key, Count = g.Count() })
-            .OrderByDescending(x => x.Count)
-            .ToArray();
+                .GroupBy(s => string.IsNullOrWhiteSpace(s.Teacher?.Name) ? "N/A" : s.Teacher.Name)
+                .Select(g => (TeacherName: g.Key, Count: g.Count()))
+                .OrderByDescending(x => x.Count)
+                .ToList();
 
-            var teacherNames = classesGroupByTeacher.Select(x => x.TeacherNames).ToArray();
-            var NumberOfClass = classesGroupByTeacher.Select(x => x.Count).ToArray();
-
-            return (teacherNames, NumberOfClass);
+            return classesGroupByTeacher;
         }
 
-        public async Task<(string[] Locations, int[] NumberOfStudent)> GetStudentCountByAddressAsync(CancellationToken cancellationToken)
+        public async Task<List<(string LocationName, int Count)>> GetStudentCountByAddressAsync(CancellationToken cancellationToken)
         {
             var students = await _studentRepository.GetAllStudentsAsync(0,0, cancellationToken);
             var studentsGroupByAddresses = students
             .GroupBy(s => string.IsNullOrWhiteSpace(s.Address) ? "N/A" : s.Address)
-            .Select(g => new { Address = g.Key, Count = g.Count() })
+            .Select(g => (LocationName : g.Key, Count : g.Count()))
             .OrderByDescending(x => x.Count)
             .Take(5)
-            .ToArray();
+            .ToList();
 
-            var locations = studentsGroupByAddresses.Select(x => x.Address).ToArray();
-            var numberOfStudent = studentsGroupByAddresses.Select(x => x.Count).ToArray();
-            return (locations, numberOfStudent);
+            return studentsGroupByAddresses;
 
         }
 
